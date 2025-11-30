@@ -7,7 +7,9 @@ import {
     GoogleAuthProvider,
     signInWithPopup
 } from 'firebase/auth';
-import { auth } from '../config/firebase.config';
+import { auth, db } from '../config/firebase.config';
+import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
+
 
 const AuthContext = createContext();
 
@@ -19,17 +21,42 @@ export function AuthProvider({ children }) {
     const [currentUser, setCurrentUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    function signup(email, password) {
-        return createUserWithEmailAndPassword(auth, email, password);
+    async function signup(email, password) {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // Create a user document in Firestore
+        await setDoc(doc(db, 'users', user.uid), {
+            email: user.email,
+            createdAt: serverTimestamp(),
+            groupId: null
+        });
+
+        return userCredential;
     }
 
     function login(email, password) {
         return signInWithEmailAndPassword(auth, email, password);
     }
 
-    function loginWithGoogle() {
+    async function loginWithGoogle() {
         const provider = new GoogleAuthProvider();
-        return signInWithPopup(auth, provider);
+        const userCredential = await signInWithPopup(auth, provider);
+        const user = userCredential.user;
+
+        // Create a user document in Firestore if it doesn't exist
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDoc = await getDoc(userDocRef);
+
+        if (!userDoc.exists()) {
+            await setDoc(userDocRef, {
+                email: user.email,
+                createdAt: serverTimestamp(),
+                groupId: null
+            });
+        }
+
+        return userCredential;
     }
 
     function logout() {

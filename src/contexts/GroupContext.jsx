@@ -10,10 +10,12 @@ import {
     getDocs,
     updateDoc,
     arrayUnion,
-    serverTimestamp
+    serverTimestamp,
+    deleteDoc
 } from 'firebase/firestore';
 import { db } from '../config/firebase.config';
 import { useAuth } from './AuthContext';
+import { useError } from './ErrorContext';
 
 const GroupContext = createContext();
 
@@ -23,9 +25,9 @@ export function useGroup() {
 
 export function GroupProvider({ children }) {
     const { currentUser } = useAuth();
+    const { showError } = useError();
     const [currentGroup, setCurrentGroup] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
 
     // Fetch user's group on load
     useEffect(() => {
@@ -51,7 +53,7 @@ export function GroupProvider({ children }) {
                 }
             } catch (err) {
                 console.error("Error fetching group:", err);
-                setError("Error al cargar la información del grupo.");
+                showError("Error al cargar la información del grupo.");
             } finally {
                 setLoading(false);
             }
@@ -132,6 +134,10 @@ export function GroupProvider({ children }) {
     async function leaveGroup() {
         if (!currentUser || !currentGroup) return;
 
+        if (currentGroup.members.length === 1) {
+            throw new Error("You are the last member. Please delete the group instead.");
+        }
+
         try {
             const groupId = currentGroup.id;
 
@@ -152,13 +158,39 @@ export function GroupProvider({ children }) {
         }
     }
 
+    // Delete current group
+    async function deleteGroup() {
+        if (!currentUser || !currentGroup) return;
+
+        if (currentGroup.createdBy !== currentUser.uid) {
+            throw new Error("Only the group creator can delete the group.");
+        }
+
+        try {
+            const groupId = currentGroup.id;
+
+            // 1. Delete the group document
+            await deleteDoc(doc(db, 'groups', groupId));
+
+            // 2. Update user profile
+            await updateDoc(doc(db, 'users', currentUser.uid), {
+                groupId: null
+            });
+
+            setCurrentGroup(null);
+        } catch (err) {
+            console.error("Error deleting group:", err);
+            throw err;
+        }
+    }
+
     const value = {
         currentGroup,
         createGroup,
         joinGroup,
         leaveGroup,
-        loading,
-        error
+        deleteGroup,
+        loading
     };
 
     return (

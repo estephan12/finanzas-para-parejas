@@ -2,6 +2,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './contexts/AuthContext'
 import { GroupProvider } from './contexts/GroupContext'
 import { ThemeProvider } from './contexts/ThemeContext'
+import { ErrorProvider } from './contexts/ErrorContext'
+import Toast from './components/Toast'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import GroupSetup from './pages/GroupSetup'
@@ -17,62 +19,65 @@ function App() {
     return (
         <ThemeProvider>
             <AuthProvider>
-                <GroupProvider>
-                    <Router>
-                        <Routes>
-                            {/* Public routes */}
-                            <Route path="/login" element={<Login />} />
-                            <Route path="/register" element={<Register />} />
+                <ErrorProvider>
+                    <GroupProvider>
+                        <Router>
+                            <Routes>
+                                {/* Public routes */}
+                                <Route path="/login" element={<Login />} />
+                                <Route path="/register" element={<Register />} />
 
-                            {/* Protected routes */}
-                            <Route path="/group-setup" element={
-                                <PrivateRoute requireGroup={false}>
-                                    <GroupSetup />
-                                </PrivateRoute>
-                            } />
+                                {/* Protected routes */}
+                                <Route path="/group-setup" element={
+                                    <PrivateRoute requireGroup={false}>
+                                        <GroupSetup />
+                                    </PrivateRoute>
+                                } />
 
-                            <Route path="/dashboard" element={
-                                <PrivateRoute>
-                                    <Dashboard />
-                                </PrivateRoute>
-                            } />
+                                <Route path="/dashboard" element={
+                                    <PrivateRoute>
+                                        <Dashboard />
+                                    </PrivateRoute>
+                                } />
 
-                            <Route path="/goals" element={
-                                <PrivateRoute>
-                                    <Goals />
-                                </PrivateRoute>
-                            } />
+                                <Route path="/goals" element={
+                                    <PrivateRoute>
+                                        <Goals />
+                                    </PrivateRoute>
+                                } />
 
-                            <Route path="/debts" element={
-                                <PrivateRoute>
-                                    <Debts />
-                                </PrivateRoute>
-                            } />
+                                <Route path="/debts" element={
+                                    <PrivateRoute>
+                                        <Debts />
+                                    </PrivateRoute>
+                                } />
 
-                            <Route path="/budgets" element={
-                                <PrivateRoute>
-                                    <Budgets />
-                                </PrivateRoute>
-                            } />
+                                <Route path="/budgets" element={
+                                    <PrivateRoute>
+                                        <Budgets />
+                                    </PrivateRoute>
+                                } />
 
-                            <Route path="/accounts" element={
-                                <PrivateRoute>
-                                    <Accounts />
-                                </PrivateRoute>
-                            } />
+                                <Route path="/accounts" element={
+                                    <PrivateRoute>
+                                        <Accounts />
+                                    </PrivateRoute>
+                                } />
 
-                            <Route path="/settings" element={
-                                <PrivateRoute>
-                                    <Settings />
-                                </PrivateRoute>
-                            } />
+                                <Route path="/settings" element={
+                                    <PrivateRoute>
+                                        <Settings />
+                                    </PrivateRoute>
+                                } />
 
-                            {/* Default redirect */}
-                            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                            <Route path="*" element={<Navigate to="/dashboard" replace />} />
-                        </Routes>
-                    </Router>
-                </GroupProvider>
+                                {/* Default redirect */}
+                                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                                <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                            </Routes>
+                            <Toast />
+                        </Router>
+                    </GroupProvider>
+                </ErrorProvider>
             </AuthProvider>
         </ThemeProvider>
     )

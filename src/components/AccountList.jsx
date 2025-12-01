@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { AccountService, ACCOUNT_TYPES } from '../services/AccountService';
 import { useGroup } from '../contexts/GroupContext';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function AccountList({ onEdit }) {
     const { currentGroup } = useGroup();
@@ -46,58 +47,87 @@ export default function AccountList({ onEdit }) {
         );
     }
 
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.1
+            }
+        }
+    };
+
+    const itemVariants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: { opacity: 1, y: 0 }
+    };
+
     return (
         <div className="space-y-4">
             {/* Total Balance Card */}
-            <div className="bg-gradient-to-br from-teal-500 to-teal-700 rounded-xl p-6 text-white shadow-lg">
+            <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5 }}
+                className="bg-gradient-to-br from-teal-500 to-teal-700 rounded-xl p-6 text-white shadow-lg"
+            >
                 <p className="text-sm opacity-90">Balance Total</p>
                 <p className="text-3xl font-bold">${totalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                 <p className="text-xs opacity-75 mt-1">{accounts.length} cuenta{accounts.length !== 1 ? 's' : ''}</p>
-            </div>
+            </motion.div>
 
             {/* Account Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {accounts.map(account => (
-                    <div
-                        key={account.id}
-                        className="bg-white rounded-xl shadow-sm p-4 border-l-4 hover:shadow-md transition-shadow"
-                        style={{ borderLeftColor: account.color }}
-                    >
-                        <div className="flex justify-between items-start mb-2">
-                            <div className="flex items-center space-x-2">
-                                <span className="text-2xl">{account.icon}</span>
-                                <div>
-                                    <h3 className="font-bold text-gray-900">{account.name}</h3>
-                                    <p className="text-xs text-gray-500">{ACCOUNT_TYPES[account.type]}</p>
+            <motion.div
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+                className="grid grid-cols-1 md:grid-cols-2 gap-4"
+            >
+                <AnimatePresence>
+                    {accounts.map(account => (
+                        <motion.div
+                            key={account.id}
+                            variants={itemVariants}
+                            exit={{ opacity: 0, scale: 0.8 }}
+                            className="bg-white rounded-xl shadow-sm p-4 border-l-4 hover:shadow-md transition-shadow"
+                            style={{ borderLeftColor: account.color }}
+                        >
+                            <div className="flex justify-between items-start mb-2">
+                                <div className="flex items-center space-x-2">
+                                    <span className="text-2xl">{account.icon}</span>
+                                    <div>
+                                        <h3 className="font-bold text-gray-900">{account.name}</h3>
+                                        <p className="text-xs text-gray-500">{ACCOUNT_TYPES[account.type]}</p>
+                                    </div>
+                                </div>
+                                <div className="flex space-x-1">
+                                    <button
+                                        onClick={() => onEdit && onEdit(account)}
+                                        className="text-gray-400 hover:text-teal-600 p-1"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(account.id)}
+                                        className="text-gray-400 hover:text-red-600 p-1"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
                                 </div>
                             </div>
-                            <div className="flex space-x-1">
-                                <button
-                                    onClick={() => onEdit && onEdit(account)}
-                                    className="text-gray-400 hover:text-teal-600 p-1"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                    </svg>
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(account.id)}
-                                    className="text-gray-400 hover:text-red-600 p-1"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                </button>
+                            <div className="mt-3">
+                                <p className="text-2xl font-bold text-gray-800">
+                                    ${Number(account.balance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                </p>
                             </div>
-                        </div>
-                        <div className="mt-3">
-                            <p className="text-2xl font-bold text-gray-800">
-                                ${Number(account.balance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                            </p>
-                        </div>
-                    </div>
-                ))}
-            </div>
+                        </motion.div>
+                    ))}
+                </AnimatePresence>
+            </motion.div>
         </div>
     );
 }

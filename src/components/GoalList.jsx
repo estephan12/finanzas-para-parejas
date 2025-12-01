@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { GoalService } from '../services/GoalService';
 import { useGroup } from '../contexts/GroupContext';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function GoalList() {
     const { currentGroup } = useGroup();
@@ -34,46 +35,75 @@ export default function GoalList() {
         );
     }
 
+    const containerVariants = {
+        hidden: { opacity: 1 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.15
+            }
+        }
+    };
+
+    const itemVariants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: { opacity: 1, y: 0 }
+    };
+
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {goals.map(goal => {
-                const progress = Math.min((goal.currentAmount / goal.targetAmount) * 100, 100);
-                const daysLeft = Math.ceil((new Date(goal.deadline) - new Date()) / (1000 * 60 * 60 * 24));
+        <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        >
+            <AnimatePresence>
+                {goals.map(goal => {
+                    const progress = Math.min((goal.currentAmount / goal.targetAmount) * 100, 100);
+                    const daysLeft = Math.ceil((new Date(goal.deadline) - new Date()) / (1000 * 60 * 60 * 24));
 
-                return (
-                    <div key={goal.id} className="bg-white rounded-xl shadow-sm p-6 relative overflow-hidden">
-                        <div className="flex justify-between items-start mb-4">
-                            <div>
-                                <h3 className="text-lg font-bold text-gray-900">{goal.name}</h3>
-                                <p className="text-sm text-gray-500">
-                                    Meta: ${goal.targetAmount.toLocaleString()}
-                                </p>
+                    return (
+                        <motion.div
+                            key={goal.id}
+                            variants={itemVariants}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            className="bg-white rounded-xl shadow-sm p-6 relative overflow-hidden"
+                        >
+                            <div className="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 className="text-lg font-bold text-gray-900">{goal.name}</h3>
+                                    <p className="text-sm text-gray-500">
+                                        Meta: ${goal.targetAmount.toLocaleString()}
+                                    </p>
+                                </div>
+                                <div className="bg-purple-100 text-purple-800 text-xs font-semibold px-2.5 py-0.5 rounded">
+                                    {daysLeft > 0 ? `${daysLeft} días restantes` : 'Vencida'}
+                                </div>
                             </div>
-                            <div className="bg-purple-100 text-purple-800 text-xs font-semibold px-2.5 py-0.5 rounded">
-                                {daysLeft > 0 ? `${daysLeft} días restantes` : 'Vencida'}
+
+                            <div className="mb-2 flex justify-between text-sm font-medium">
+                                <span className="text-gray-700">${goal.currentAmount.toLocaleString()}</span>
+                                <span className="text-gray-500">{progress.toFixed(0)}%</span>
                             </div>
-                        </div>
 
-                        <div className="mb-2 flex justify-between text-sm font-medium">
-                            <span className="text-gray-700">${goal.currentAmount.toLocaleString()}</span>
-                            <span className="text-gray-500">{progress.toFixed(0)}%</span>
-                        </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2.5">
+                                <motion.div
+                                    className="bg-purple-600 h-2.5 rounded-full"
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${progress}%` }}
+                                    transition={{ duration: 0.8, ease: "easeOut" }}
+                                />
+                            </div>
 
-                        <div className="w-full bg-gray-200 rounded-full h-2.5">
-                            <div
-                                className="bg-purple-600 h-2.5 rounded-full transition-all duration-500"
-                                style={{ width: `${progress}%` }}
-                            ></div>
-                        </div>
-
-                        <div className="mt-4 flex justify-end">
-                            <button className="text-sm text-purple-600 hover:text-purple-800 font-medium">
-                                + Agregar Fondos
-                            </button>
-                        </div>
-                    </div>
-                );
-            })}
-        </div>
+                            <div className="mt-4 flex justify-end">
+                                <button className="text-sm text-purple-600 hover:text-purple-800 font-medium">
+                                    + Agregar Fondos
+                                </button>
+                            </div>
+                        </motion.div>
+                    );
+                })}
+            </AnimatePresence>
+        </motion.div>
     );
 }

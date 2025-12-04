@@ -41,7 +41,10 @@ export default function GoalList() {
                 const daysLeft = Math.ceil((new Date(goal.deadline) - new Date()) / (1000 * 60 * 60 * 24));
 
                 return (
-                    <div key={goal.id} className="bg-white rounded-xl shadow-sm p-6 relative overflow-hidden">
+                    <div
+                        key={goal.id}
+                        className="bg-white rounded-xl shadow-sm p-6 relative overflow-hidden"
+                    >
                         <div className="flex justify-between items-start mb-4">
                             <div>
                                 <h3 className="text-lg font-bold text-gray-900">{goal.name}</h3>
@@ -61,9 +64,9 @@ export default function GoalList() {
 
                         <div className="w-full bg-gray-200 rounded-full h-2.5">
                             <div
-                                className="bg-purple-600 h-2.5 rounded-full transition-all duration-500"
+                                className="bg-purple-600 h-2.5 rounded-full"
                                 style={{ width: `${progress}%` }}
-                            ></div>
+                            />
                         </div>
 
                         <div className="mt-4 flex justify-end">

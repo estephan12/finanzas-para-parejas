@@ -23,7 +23,10 @@ export default function TransactionList({ transactions = [], loading = false }) 
                 const isPrivate = tx.private && tx.paidBy !== currentUser.uid;
 
                 return (
-                    <div key={tx.id} className="bg-white p-4 rounded-xl shadow-sm flex justify-between items-center">
+                    <div
+                        key={tx.id}
+                        className="bg-white p-4 rounded-xl shadow-sm flex justify-between items-center"
+                    >
                         <div className="flex items-center space-x-3">
                             <div className={`p-2 rounded-full ${isExpense ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
                                 {isExpense ? (

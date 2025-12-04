@@ -40,23 +40,29 @@ export function AuthProvider({ children }) {
     }
 
     async function loginWithGoogle() {
-        const provider = new GoogleAuthProvider();
-        const userCredential = await signInWithPopup(auth, provider);
-        const user = userCredential.user;
+        try {
+            const provider = new GoogleAuthProvider();
+            const userCredential = await signInWithPopup(auth, provider);
+            const user = userCredential.user;
 
-        // Create a user document in Firestore if it doesn't exist
-        const userDocRef = doc(db, 'users', user.uid);
-        const userDoc = await getDoc(userDocRef);
+            // Create a user document in Firestore if it doesn't exist
+            const userDocRef = doc(db, 'users', user.uid);
+            const userDoc = await getDoc(userDocRef);
 
-        if (!userDoc.exists()) {
-            await setDoc(userDocRef, {
-                email: user.email,
-                createdAt: serverTimestamp(),
-                groupId: null
-            });
+            if (!userDoc.exists()) {
+                await setDoc(userDocRef, {
+                    email: user.email,
+                    createdAt: serverTimestamp(),
+                    groupId: null
+                });
+            }
+
+            return userCredential;
+        } catch (error) {
+            console.error("Error during Google login:", error);
+            // Re-throw the error so the UI can handle it if needed
+            throw error;
         }
-
-        return userCredential;
     }
 
     function logout() {
